@@ -25,4 +25,23 @@ public class RabbitMQConsumer {
             e.printStackTrace();
         }
     }
+    
+    public void consumeWithAck() {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        factory.setUsername("guest");
+        factory.setPassword("guest");
+        
+        try (Connection connection = factory.newConnection();
+             Channel channel = connection.createChannel()) {
+            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            channel.basicConsume(QUEUE_NAME, false, (consumerTag, delivery) -> {
+                String message = new String(delivery.getBody(), "UTF-8");
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+            }, consumerTag -> { });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
 }
